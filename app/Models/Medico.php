@@ -12,6 +12,7 @@ class Medico extends Model
     protected $fillable = [
         'nombres_medico',
         'rut_medico',
-        'apellidoP'
+        'apellidoP',
+        'apellidoM'
     ];
 }

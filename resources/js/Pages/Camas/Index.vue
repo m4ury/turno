@@ -5,7 +5,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-//import SelectInput from '@/Components/SelectInput.vue';
+import SelectInput from '@/Components/SelectInput.vue';
 import WarningButton from '@/Components/WarningButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import Modal from '@/Components/Modal.vue';
@@ -16,46 +16,44 @@ import VueTailwindPagination from '@ocrv/vue-tailwind-pagination';
 import Checkbox from '@/Components/Checkbox.vue';
 
 
-const nombresInput = ref(null);
-const rutInput = ref(null);
-const apellidoInput = ref(null);
-const apellidoMInput = ref(null);
+const numInput = ref(null);
+const estadoInput = ref(null);
+const salaInput = ref(null);
 const modal = ref(false);
 const title = ref('');
 const operation = ref(1);
 const id = ref('');
 
 const props = defineProps({
-    medico: { type: Object }
+    cama: { type: Object },
+    sala: { type: Object }
 });
 
 const form = useForm({
-    nombres_medico: '',
-    rut_medico: '',
-    apellidoP: '',
-    apellidoM: '',
+    numero_cama: '',
+    estado_cama: '',
+    sala_id: '',
 });
 
 const formPage = useForm({});
 
 const onPageClick = (event) => {
-    formPage.get(route('medicos.index', { page: event }));
+    formPage.get(route('camas.index', { page: event }));
 }
 
-const openModal = (op, nombres_medico, rut_medico, apellidoP, apellidoM, medic) => {
+const openModal = (op, numero_cama, estado_cama, cam, sal) => {
     modal.value = true;
-    nextTick(() => rutInput.value.focus());
+    nextTick(() => numInput.value.focus());
     operation.value = op;
-    id.value = medic;
+    id.value = cam;
     if (op == 1) {
-        title.value = 'Crear Medico';
+        title.value = 'Crear Cama';
     }
     else {
-        title.value = 'Editar Medico';
-        form.nombres_medico = nombres_medico;
-        form.rut_medico = rut_medico;
-        form.apellidoP = apellidoP;
-        form.apellidoM = apellidoM;
+        title.value = 'Editar Cama';
+        form.numero_cama = numero_cama;
+        form.estado_cama = estado_cama;
+        form.sala_id = sal;
     }
 }
 const closeModal = () => {
@@ -65,13 +63,13 @@ const closeModal = () => {
 
 const save = () => {
     if (operation.value == 1) {
-        form.post(route('medicos.store'), {
-            onSuccess: () => { ok('Medico creado') }
+        form.post(route('camas.store'), {
+            onSuccess: () => { ok('Cama creada') }
         });
     }
     else {
-        form.put(route('medicos.update', id.value), {
-            onSuccess: () => { ok('Medico modificado') }
+        form.put(route('camas.update', id.value), {
+            onSuccess: () => { ok('Cama modificada') }
         });
     }
 }
@@ -81,19 +79,19 @@ const ok = (msj) => {
     Swal.fire({ title: msj, icon: 'success' });
 }
 
-const deleteMedico = (id, nombres_medico) => {
+const deleteCama = (id, numero_cama) => {
     const alerta = Swal.mixin({
         buttonsStyling: true
     });
     alerta.fire({
-        title: 'Estas sguro de eliminar ' + nombres_medico + ' ?',
+        title: 'Estas sguro de eliminar ' + numero_cama + ' ?',
         icon: 'question', showCancelButton: true,
         confirmButtonText: '<i class="fa-solid fa-check"></i> Si, eliminar',
         cancelButtonText: '<i class="fa-solid fa-ban"></i> Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
-            form.delete(route('medicos.destroy', id)), {
-                onSuccess: () => { ok('Medico eliminado') }
+            form.delete(route('camas.destroy', id)), {
+                onSuccess: () => { ok('Cama eliminada') }
             }
         }
     })
@@ -101,11 +99,11 @@ const deleteMedico = (id, nombres_medico) => {
 </script>
 
 <template>
-    <Head title="Medicos" />
+    <Head title="Camas" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Medicos</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Camas</h2>
         </template>
 
         <div class="py-12">
@@ -121,29 +119,24 @@ const deleteMedico = (id, nombres_medico) => {
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="px-4 py-4">#</th>
-                            <th class="px-4 py-4">RUT</th>
-                            <th class="px-4 py-4">Nombres</th>
-                            <th class="px-4 py-4">Apellido Paterno</th>
-                            <th class="px-4 py-4">Apellido Materno</th>
-                            <th class="px-4 py-4">Editar</th>
-                            <th class="px-4 py-4">Eliminar</th>
+                            <th class="px-4 py-4">Num. Cama</th>
+                            <th class="px-4 py-4">Estado</th>
+                            <th class="px-4 py-4">Num. Sala</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="med, i in medico" :key="med.id">
+                        <tr v-for="cam, i in cama" :key="cam.id">
                             <td class="border border-gray-400 px-4 py-4">{{ (i + 1) }}</td>
-                            <td class="border border-gray-400 px-4 py-4">{{ med.rut_medico }}</td>
-                            <td class="border border-gray-400 px-4 py-4">{{ med.nombres_medico }}</td>
-                            <td class="border border-gray-400 px-4 py-4">{{ med.apellidoP }}</td>
-                            <td class="border border-gray-400 px-4 py-4">{{ med.apellidoM }}</td>
+                            <td class="border border-gray-400 px-4 py-4">{{ cam.numero_cama }}</td>
+                            <td class="border border-gray-400 px-4 py-4">{{ cam.estado_cama }}</td>
+                            <td class="border border-gray-400 px-4 py-4">{{ cam.sala }}</td>
                             <td class="border border-gray-400 px-4 py-4">
-                                <WarningButton
-                                    @click="openModal(2, med.rut_medico, med.nombres_medico, med.apellidoP, med.apellidoM, med.id)">
+                                <WarningButton @click="openModal(2, cam.numero_cama, cam.estado_cama, cam.sala_id, cam.id)">
                                     <i class="fa-solid fa-edit"></i>
                                 </WarningButton>
                             </td>
                             <td class="border border-gray-400 px-4 py-4">
-                                <DangerButton @click="deleteMedico(med.id, med.nombres_medico)">
+                                <DangerButton @click="deleteCama(cam.id, cam.numero_cama)">
                                     <i class="fa-solid fa-trash"></i>
                                 </DangerButton>
                             </td>
@@ -152,35 +145,38 @@ const deleteMedico = (id, nombres_medico) => {
                 </table>
             </div>
             <div class="bg-white grid v-screen place-items-center overflow-x-auto">
-                <VueTailwindPagination :current="medico.currentPage" :total="medico.total" :per-page="medico.perPage"
+                <VueTailwindPagination :current="cama.currentPage" :total="cama.total" :per-page="cama.perPage"
                     @page-changed="onPageClick($event)"></VueTailwindPagination>
             </div>
         </div>
         <Modal :show="modal" @close="closeModal()">
             <h2 class="p-3 text-lg font.medium text-hray-900">{{ title }}</h2>
             <div class="p-3">
-                <InputLabel for="rut_medico" value="Rut: "></InputLabel>
-                <TextInput id="rut_medico" ref="rutInput" v-model="form.rut_medico" type="text" class="mt-1 block w-3/4"
-                    placeholder="ejemplo:16000111-9"></TextInput>
-                <InputError :messaje="form.errors.rut_medico" class="mt-2"></InputError>
+                <InputLabel for="numero_cama" value="Numero de cama: "></InputLabel>
+                <TextInput id="numero_cama" ref="numInput" v-model="form.numero_cama" type="number" class="mt-1 block w-3/4"
+                    placeholder="ingrese el numero de cama"></TextInput>
+                <InputError :messaje="form.errors.numero_cama" class="mt-2"></InputError>
             </div>
             <div class="p-3">
-                <InputLabel for="nombres_medico" value="Nombres: "></InputLabel>
-                <TextInput id="nombres_medico" ref="nombresInput" v-model="form.nombres_medico" type="text"
-                    class="mt-1 block w-3/4" placeholder="Nombres"></TextInput>
-                <InputError :messaje="form.errors.nombres_medico" class="mt-2"></InputError>
+                <InputLabel for="estado_cama" value="Estado: "></InputLabel>
+                <SelectInput id="estado_cama" :options="['ocupada', 'desocupada']" class="mt-1 block w-3/4"
+                    placeholder="Estado"></SelectInput>
+                <InputError :messaje="form.errors.estado_cama" class="mt-2"></InputError>
             </div>
+            <!-- <div class="p-3">
+                <InputLabel for="estado_cama" value="Estado cama: "></InputLabel>
+                <TextInput id="estado_cama" ref="estadoInput" v-model="form.estado_cama" type="text"
+                    class="mt-1 block w-3/4" placeholder="Estado cama"></TextInput>
+                <InputError :messaje="form.errors.estado_cama" class="mt-2"></InputError>
+            </div> -->
             <div class="p-3">
-                <InputLabel for="apellidoP" value="Apellido paterno: "></InputLabel>
-                <TextInput id="apellidoP" ref="apellidoInput" v-model="form.apellidoP" type="text" class="mt-1 block w-3/4"
-                    placeholder="Apellido paterno"></TextInput>
-                <InputError :messaje="form.errors.apellidoP" class="mt-2"></InputError>
-            </div>
-            <div class="p-3">
-                <InputLabel for="apellidoM" value="Apellido materno: "></InputLabel>
-                <TextInput id="apellidoM" ref="apellidoMInput" v-model="form.apellidoM" type="text" class="mt-1 block w-3/4"
-                    placeholder="Apellido materno"></TextInput>
-                <InputError :messaje="form.errors.apellidoM" class="mt-2"></InputError>
+                <InputLabel for="sala" value="Sala: "></InputLabel>
+                <SelectInput id="sala" :options="sala" v-model="form.sala" class="mt-1 block w-3/4" placeholder="Sala">
+                </SelectInput>
+                <InputError :messaje="form.errors.sala" class="mt-2"></InputError>
+                <!-- <TextInput id="sala_id" ref="salaInput" v-model="form.sala_id" type="text"
+                    class="mt-1 block w-3/4" placeholder="Sala"></TextInput>
+                <InputError :messaje="form.errors.sala_id" class="mt-2"></InputError> -->
             </div>
 
             <div class="p-3 mt-6">

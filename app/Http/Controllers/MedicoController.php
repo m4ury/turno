@@ -13,12 +13,13 @@ class MedicoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index()
     {
-        return Inertia::render('Medicos/Index', [
-        'medicos' => Medico::select('rut_medico', 'nombres_medico')->paginate(7),
-        ]);
+        $medico = Medico::select('id', 'nombres_medico', 'rut_medico', 'apellidoP', 'apellidoM')->get();
 
+        return Inertia::render('Medicos/Index', [
+            'medico' => $medico
+        ]);
     }
 
     /**
@@ -26,7 +27,7 @@ class MedicoController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Medicos/Create');
     }
 
     /**
@@ -37,7 +38,7 @@ class MedicoController extends Controller
         //dd($request->all());
         $request->validate([
             'nombres_medico' => 'required|string|max:255',
-            'rut_medico' => 'required|string|max:255',
+            'rut_medico' => 'required|cl_rut',
             'apellidoP' => 'required|string|max:255',
 
         ]);
@@ -60,7 +61,7 @@ class MedicoController extends Controller
      */
     public function edit(Medico $medico)
     {
-        //
+        return Inertia::render('Medicos/Edit', ['medico' => $medico]);
     }
 
     /**
@@ -68,7 +69,9 @@ class MedicoController extends Controller
      */
     public function update(Request $request, Medico $medico)
     {
-        //
+        $request->validate(['nombres_medico' => 'required|max:90']);
+        $medico->update($request->all());
+        return redirect('medicos');
     }
 
     /**
@@ -76,6 +79,7 @@ class MedicoController extends Controller
      */
     public function destroy(Medico $medico)
     {
-        //
+        $medico->delete();
+        return redirect('medicos');
     }
 }

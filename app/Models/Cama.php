@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Cama extends Model
 {
     use HasFactory;
+
+    public function sala()
+    {
+        return $this->belongsTo(Sala::class);
+    }
 }

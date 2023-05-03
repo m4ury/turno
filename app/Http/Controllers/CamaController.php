@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cama;
+use App\Models\Sala;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CamaController extends Controller
 {
@@ -12,7 +14,11 @@ class CamaController extends Controller
      */
     public function index()
     {
-        //
+        $cama = Cama::with('sala')->select('camas.id', 'numero_cama', 'estado_cama', 'sala_id')->latest()->get();
+        $sala = Sala::select('id', 'numero_sala', 'descripcion_sala')->latest()->get();
+        return Inertia::render('Camas/Index', [
+            'cama' => $cama, 'sala' => $sala
+        ]);
     }
 
     /**
